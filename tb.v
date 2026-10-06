@@ -8,6 +8,10 @@ module tb;
    reg       btnR;
    
    integer   i;
+   integer   k;
+   reg [7:0] instructions [0:1023];
+   integer   num_insts;
+   
    
    /*AUTOWIRE*/
    // Beginning of automatic wires (for undeclared instantiated-module outputs)
@@ -18,6 +22,11 @@ module tb;
 
    initial
      begin
+        $readmemb("seq.code", instructions);
+     
+        for (i = 1; i < 1024; i = i + 1)
+            $display("instructions[%0d] = %08b", i, instructions[i]);
+         
         //$shm_open  ("dump", , ,1);
         //$shm_probe (tb, "ASTF");
 
@@ -27,15 +36,22 @@ module tb;
         #1000 btnR = 0;
         #1500000;
         
-        tskRunPUSH(0,4);
-        tskRunPUSH(0,0);
-        tskRunPUSH(1,3);
-        tskRunMULT(0,1,2);
-        tskRunADD(2,0,3);
-        tskRunSEND(0);
-        tskRunSEND(1);
-        tskRunSEND(2);
-        tskRunSEND(3);
+        // Determine # of instructions
+        num_insts = instructions[0];
+        
+        //Iterate
+        for (i = 1; i <= num_insts; i = i + 1)
+            tskRunInst(instructions[i]);
+        
+//        tskRunPUSH(0,4);
+//        tskRunPUSH(0,0);
+//        tskRunPUSH(1,3);
+//        tskRunMULT(0,1,2);
+//        tskRunADD(2,0,3);
+//        tskRunSEND(0);
+//        tskRunSEND(1);
+//        tskRunSEND(2);
+//        tskRunSEND(3);
         
         #1000;        
         $finish;
