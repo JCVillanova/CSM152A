@@ -31,8 +31,10 @@ module stopwatch_counter(
     input wire adj,
     input wire sel,
     input wire pause,
-    output reg [5:0] seconds,
-    output reg [5:0] minutes
+    output reg [3:0] sec_ones,
+    output reg [3:0] sec_tens,
+    output reg [3:0] min_ones,
+    output reg [3:0] min_tens
 );
 
     reg paused;
@@ -55,39 +57,59 @@ module stopwatch_counter(
     // Stopwatch counting and adjustment.
     always @(posedge clk) begin
         if (rst) begin
-            seconds <= 6'd0;
-            minutes <= 6'd0;
+            sec_ones <= 4'd0;
+            sec_tens <= 4'd0;
+            min_ones <= 4'd0;
+            min_tens <= 4'd0;
         end
         else if (adj) begin
             // Adjustment mode: sel=0 adjusts minutes,
             // sel=1 adjusts seconds.
             if (tick_2hz) begin
                 if (sel) begin
-                    if (seconds == 6'd59)
-                        seconds <= 6'd0;
-                    else
-                        seconds <= seconds + 1'b1;
+                    if (sec_ones == 4'd9) begin
+                        sec_ones <= 4'd0;
+                        if (sec_tens == 4'd5) sec_tens <= 4'd0;
+                        else sec_tens <= sec_tens + 1'b1;
+                    end else begin
+                        sec_ones <= sec_ones + 1'b1;
+                    end
                 end
                 else begin
-                    if (minutes == 6'd59)
-                        minutes <= 6'd0;
-                    else
-                        minutes <= minutes + 1'b1;
+                    if (min_ones == 4'd9) begin
+                        min_ones <= 4'd0;
+                        if (min_tens == 4'd5) min_tens <= 4'd0;
+                        else min_tens <= min_tens + 1'b1;
+                    end else begin
+                        min_ones <= min_ones + 1'b1;
+                    end
                 end
             end
         end
         else if (!paused && tick_1hz) begin
             // Normal stopwatch mode.
-            if (seconds == 6'd59) begin
-                seconds <= 6'd0;
-
-                if (minutes == 6'd59)
-                    minutes <= 6'd0;
-                else
-                    minutes <= minutes + 1'b1;
+            if (sec_ones == 4'd9) begin
+                sec_ones <= 4'd0;
+                
+                if (sec_tens == 4'd5) begin
+                    sec_tens <= 4'd0;
+                    
+                    if (min_ones == 4'd9) begin
+                        min_ones <= 4'd0;
+                        
+                        if (min_tens == 4'd5) min_tens <= 4'd0;
+                        else min_tens <= min_tens + 1'b1;
+                        
+                    end else begin
+                        min_ones <= min_ones + 1'b1;
+                    end
+                    
+                end else begin
+                    sec_tens <= sec_tens + 1'b1;
+                end
             end
             else begin
-                seconds <= seconds + 1'b1;
+                sec_ones <= sec_ones + 1'b1;
             end
         end
     end

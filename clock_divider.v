@@ -1,4 +1,3 @@
-
 `timescale 1ns / 1ps
 
 module clock_divider(
@@ -6,28 +5,32 @@ module clock_divider(
     input wire rst,
     output reg tick_scan,
     output reg tick_1hz,
-    output reg tick_2hz
+    output reg tick_2hz,
+    output reg tick_blink
 );
 
     // Counters for the 100 MHz input clock
-    reg [16:0] scan_count;
+    reg [17:0] scan_count;
     reg [26:0] count_1hz;
     reg [25:0] count_2hz;
+    reg [24:0] count_blink;
 
     always @(posedge clk) begin
         if (rst) begin
             scan_count <= 0;
             count_1hz <= 0;
             count_2hz <= 0;
+            count_blink <= 0;
 
             tick_scan <= 0;
             tick_1hz <= 0;
             tick_2hz <= 0;
+            tick_blink <= 0;
         end
         else begin
 
-            // Display scan: pulse every 1 ms
-            if (scan_count == 17'd99999) begin
+            // Display scan: pulse every 2 ms (500 Hz)
+            if (scan_count == 17'd199999) begin
                 scan_count <= 0;
                 tick_scan <= 1'b1;
             end
@@ -54,6 +57,16 @@ module clock_divider(
             else begin
                 count_2hz <= count_2hz + 1'b1;
                 tick_2hz <= 1'b0;
+            end
+
+            // Blink adjustment: pulse every 0.25 seconds (4 Hz)
+            if (count_blink == 25'd24999999) begin
+                count_blink <= 0;
+                tick_blink <= 1'b1;
+            end
+            else begin
+                count_blink <= count_blink + 1'b1;
+                tick_blink <= 1'b0;
             end
 
         end

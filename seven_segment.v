@@ -25,6 +25,9 @@ module seven_segment(
     input rst,
     input wire [6:0] seg0,seg1, seg2, seg3,
     input wire tick_scan,
+    input wire tick_blink,
+    input wire adj,
+    input wire sel,
     output reg [3:0] Anode_activate,
     output reg [6:0] LED_out
     );
@@ -32,6 +35,16 @@ module seven_segment(
     // Chooses which of the four digits is currently active.
     reg [1:0] digit_select;
     reg [6:0] selected_seg;
+    
+    // Keeps track of the blink on/off phase
+    reg blink_state;
+
+    always @(posedge clk) begin
+        if (rst)
+            blink_state <= 1'b0;
+        else if (tick_blink)
+            blink_state <= ~blink_state;
+    end
 
     // Advance to the next digit whenever tick_scan pulses.
     always @(posedge clk) begin
@@ -50,22 +63,24 @@ module seven_segment(
 
         case (digit_select)
             2'd0: begin
-                Anode_activate = 4'b1110;
+                // Blank the seconds digits (0 and 1) when adj=1, sel=1, and blink_state=1
+                Anode_activate = (adj && sel && blink_state) ? 4'b1111 : 4'b1110;
                 selected_seg = seg0;
             end
 
             2'd1: begin
-                Anode_activate = 4'b1101;
+                Anode_activate = (adj && sel && blink_state) ? 4'b1111 : 4'b1101;
                 selected_seg = seg1;
             end
 
             2'd2: begin
-                Anode_activate = 4'b1011;
+                // Blank the minutes digits (2 and 3) when adj=1, sel=0, and blink_state=1
+                Anode_activate = (adj && !sel && blink_state) ? 4'b1111 : 4'b1011;
                 selected_seg = seg2;
             end
 
             2'd3: begin
-                Anode_activate = 4'b0111;
+                Anode_activate = (adj && !sel && blink_state) ? 4'b1111 : 4'b0111;
                 selected_seg = seg3;
             end
 

@@ -19,45 +19,17 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-
-
-
-
-
-
 module bin_to_7seg(
-    input [15:0] binary_in,
+    input [3:0] digit0,
+    input [3:0] digit1,
+    input [3:0] digit2,
+    input [3:0] digit3,
     output reg  [6:0] seg0,
     output reg  [6:0] seg1,
     output reg  [6:0] seg2,
     output reg  [6:0] seg3
     );
     
-    reg [3:0] digit0;
-    reg [3:0] digit1;
-    reg [3:0] digit2;
-    reg [3:0] digit3;
-    
-    
-      // Step 1: Isolate the four decimal digits
-      always @(*) begin
-          // TODO: Extract ones digit
-          // digit0 = ...
-          digit0 = binary_in % 10;
-  
-          // TODO: Extract tens digit
-          // digit1 = ...
-          digit1 = (binary_in / 10) % 10;
-  
-          // TODO: Extract hundreds digit
-          // digit2 = ...
-          digit2 = (binary_in / 100) % 10;
-  
-          // TODO: Extract thousands digit
-          // digit3 = ...
-          digit3 = (binary_in / 1000) % 10;
-      end
-  
     always @(*) begin
       
           // Digit 0: Ones
@@ -122,5 +94,4 @@ module bin_to_7seg(
       
       end
 
-    
 endmodule
